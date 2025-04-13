@@ -16,8 +16,6 @@
 
 package io.cdap.wrangler.api.parser;
 
-import io.cdap.wrangler.api.annotations.PublicEvolving;
-
 import java.io.Serializable;
 
 /**
@@ -30,9 +28,12 @@ import java.io.Serializable;
  *
  * @see Bool
  * @see BoolList
+ * @see ByteSize
  * @see ColumnName
  * @see ColumnNameList
  * @see DirectiveName
+ * @see Expression
+ * @see Identifier
  * @see Numeric
  * @see NumericList
  * @see Properties
@@ -40,15 +41,35 @@ import java.io.Serializable;
  * @see Expression
  * @see Text
  * @see TextList
+ * @see TimeDuration
  */
-@PublicEvolving
+@io.cdap.wrangler.api.annotations.PublicEvolving // Keep the annotation here
+
 public enum TokenType implements Serializable {
   /**
-   * Represents the enumerated type for the object {@code DirectiveName} type.
-   * This type is associated with the token that is recognized as a directive
-   * name within the recipe.
+   * Represents the enumerated type for the object of type {@code BoolList} type.
+   * This type is associated with the collection of {@code Bool} values separated by
+   * comma(,). E.g.
+   * <code>
+   * Boolean[,Boolean]*
+   * </code>
    */
-  DIRECTIVE_NAME,
+  BOOLEAN_LIST,
+
+  /**
+   * Represents the enumerated type for the object of {@code Bool} type.
+   * This type is associated with the token that either represents string 'true' or 'false'.
+   */
+  BOOLEAN,
+
+  /**
+   * Represents the enumerated type for the object of type {@code ByteSize} type.
+   * This type is associated with the token that represents a byte size. E.g.
+   * <code>
+   * 1KB, 1MB, 1GB, 1TB, 1PB
+   * </code>
+   */
+  BYTE_SIZE,
 
   /**
    * Represents the enumerated type for the object of {@code ColumnName} type.
@@ -58,11 +79,48 @@ public enum TokenType implements Serializable {
   COLUMN_NAME,
 
   /**
-   * Represents the enumerated type for the object of {@code Text} type.
-   * This type is associated with the token that is either enclosed within a single quote(')
-   * or a double quote (") as string.
+   * Represents the enumerated type for the object of type {@code ColumnNameList} type.
+   * This type is associated with the rule that is a collection of {@code Boolean} values
+   * separated by comman(,). E.g.
+   * <code>
+   * ColumnName[,ColumnName]*
+   * </code>
    */
-  TEXT,
+  COLUMN_NAME_LIST,
+
+  /**
+   * Represents the enumerated type for the object {@code DirectiveName} type.
+   * This type is associated with the token that is recognized as a directive
+   * name within the recipe.
+   */
+  DIRECTIVE_NAME,
+
+  /**
+   * Represents the enumerated type for the object of type {@code Expression} type.
+   * This type is associated with code block that either represents a condition or
+   * an expression. E.g.
+   * <code>
+   * exp:{ <expression || condition> }
+   * </code>
+   */
+  EXPRESSION,
+
+  /**
+   * Represents the enumerated type for the object of type {@code String} with restrictions
+   * on characters that can be present in a string.
+   */
+  IDENTIFIER,
+
+  /**
+   * Represents the enumerated type for the object of type {@code NumericList} type.
+   * This type is associated with the collection of {@code Numeric} values separated by
+   * comma(,). E.g.
+   * <code>
+   * Numeric[,Numeric]*
+   * </code>
+   *
+   */
+  NUMERIC_LIST,
 
   /**
    * Represents the enumerated type for the object of {@code Numeric} type.
@@ -71,69 +129,11 @@ public enum TokenType implements Serializable {
   NUMERIC,
 
   /**
-   * Represents the enumerated type for the object of {@code Bool} type.
-   * This type is associated with the token that either represents string 'true' or 'false'.
-   */
-  BOOLEAN,
-
-  /**
-   * Represents the enumerated type for the object of type {@code BoolList} type.
-   * This type is associated with the rule that is a collection of {@code Boolean} values
-   * separated by comman(,). E.g.
-   * <code>
-   *   ColumnName[,ColumnName]*
-   * </code>
-   */
-  COLUMN_NAME_LIST,
-
-  /**
-   * Represents the enumerated type for the object of type {@code TextList} type.
-   * This type is associated with the comma separated text represented were each text
-   * is enclosed within a single quote (') or double quote (") and each text is separated
-   * by comma (,). E.g.
-   * <code>
-   *   Text[,Text]*
-   * </code>
-   */
-  TEXT_LIST,
-
-  /**
-   * Represents the enumerated type for the object of type {@code NumericList} type.
-   * This type is associated with the collection of {@code Numeric} values separated by
-   * comma(,). E.g.
-   * <code>
-   *   Numeric[,Numeric]*
-   * </code>
-   *
-   */
-  NUMERIC_LIST,
-
-  /**
-   * Represents the enumerated type for the object of type {@code BoolList} type.
-   * This type is associated with the collection of {@code Bool} values separated by
-   * comma(,). E.g.
-   * <code>
-   *   Boolean[,Boolean]*
-   * </code>
-   */
-  BOOLEAN_LIST,
-
-  /**
-   * Represents the enumerated type for the object of type {@code Expression} type.
-   * This type is associated with code block that either represents a condition or
-   * an expression. E.g.
-   * <code>
-   *   exp:{ <expression || condition> }
-   * </code>
-   */
-  EXPRESSION,
-
-  /**
    * Represents the enumerated type for the object of type {@code Properties} type.
    * This type is associated with a collection of key and value pairs all separated
    * by a comma(,). E.g.
    * <code>
-   *   prop:{ <key>=<value>[,<key>=<value>]*}
+   * prop:{ <key>=<value>[,<key>=<value>]*}
    * </code>
    */
   PROPERTIES,
@@ -143,14 +143,35 @@ public enum TokenType implements Serializable {
    * This type is associated with a collection of range represented in the form shown
    * below
    * <code>
-   *   <start>:<end>=value[,<start>:<end>=value]*
+   * <start>:<end>=value[,<start>:<end>=value]*
    * </code>
    */
   RANGES,
 
   /**
-   * Represents the enumerated type for the object of type {@code String} with restrictions
-   * on characters that can be present in a string.
+   * Represents the enumerated type for the object of type {@code TextList} type.
+   * This type is associated with the comma separated text represented were each text
+   * is enclosed within a single quote (') or double quote (") and each text is separated
+   * by comma (,). E.g.
+   * <code>
+   * Text[,Text]*
+   * </code>
    */
-  IDENTIFIER
+  TEXT_LIST,
+
+  /**
+   * Represents the enumerated type for the object of {@code Text} type.
+   * This type is associated with the token that is either enclosed within a single quote(')
+   * or a double quote (") as string.
+   */
+  TEXT,
+
+  /**
+   * Represents the enumerated type for the object of type {@code TimeDuration} type.
+   * This type is associated with the token that represents a time duration. E.g.
+   * <code>
+   * 1ns, 1us, 1ms, 1s, 1m, 1h
+   * </code>
+   */
+  TIME_DURATION
 }
