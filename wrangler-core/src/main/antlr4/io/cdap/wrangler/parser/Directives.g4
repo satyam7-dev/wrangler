@@ -147,6 +147,7 @@ value
  | Bool
  | BYTE_SIZE        # byteSizeLiteral
  | TIME_DURATION    # timeDurationLiteral
+ | Identifier
  ;
 
 ecommand
@@ -326,3 +327,25 @@ fragment TIME_UNIT   : ('ns' | 'us' | 'ms' | 's' | 'm' | 'h');
 
 BYTE_SIZE            : DECIMAL BYTE_UNIT;
 TIME_DURATION        : DECIMAL TIME_UNIT;
+
+byteSizeArg : BYTE_SIZE ;
+timeDurationArg : TIME_DURATION ;
+
+argument
+  : codeblock
+  | identifier
+  | macro
+  | text
+  | number
+  | bool
+  | column
+  | colList
+  | numberList
+  | boolList
+  | stringList
+  | numberRanges
+  | properties
+  | value
+  | byteSizeArg
+  | timeDurationArg
+  ;
